@@ -1,0 +1,15 @@
+type Customer {
+    id: ID
+    name: String
+    profile: Profile
+}
+
+type Profile {
+    id: ID
+    customerId: ID
+}
+
+type Query {
+    customers: [Customer]
+    customerById(id: ID): Customer
+}
