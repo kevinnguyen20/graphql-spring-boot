@@ -3,14 +3,12 @@ type Account {
 }
 
 type Customer {
-    id: ID,
+    id: ID
     name: String
     account: Account
 }
 
 type Query {
-    hello: String
-    helloWithName(name: String): String
+
     customers: [Customer]
-    customerById(id: ID): Customer
 }
