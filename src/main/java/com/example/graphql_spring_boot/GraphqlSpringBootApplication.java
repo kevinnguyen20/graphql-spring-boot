@@ -2,14 +2,13 @@ package com.example.graphql_spring_boot;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.graphql.data.method.annotation.BatchMapping;
-import org.springframework.graphql.data.method.annotation.QueryMapping;
+import org.springframework.graphql.data.method.annotation.*;
 import org.springframework.stereotype.Controller;
 
-import java.util.Collection;
-import java.util.List;
+
 import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @SpringBootApplication
 public class GraphqlSpringBootApplication {
@@ -20,28 +19,24 @@ public class GraphqlSpringBootApplication {
 }
 
 @Controller
-class BatchController {
+class MutationController {
+
+    private final Map<Integer, Customer> db = new ConcurrentHashMap<>();
+    private final AtomicInteger id = new AtomicInteger();
+
+    @MutationMapping
+    // @SchemaMapping(typeName = "Mutation", field = "addCustomer")
+    Customer addCustomer(@Argument String name) {
+        var id = this.id.incrementAndGet();
+        var value = new Customer(id, name);
+        this.db.put(id, value);
+        return value;
+    }
 
     @QueryMapping
-    Collection<Customer> customers() {
-        return List.of(
-                new Customer(1, "A"),
-                new Customer(2, "B")
-        );
+    Customer customerById(@Argument Integer id) {
+        return this.db.get(id);
     }
-
-    @BatchMapping
-    Map<Customer, Account> account(List<Customer> customers) {
-        return customers
-                .stream()
-                .collect(Collectors.toMap(customer -> customer, customer -> new Account(customer.id())));
-    }
-
-    /* @SchemaMapping(typeName = "Customer")
-    Account account(Customer customer) {
-        return new Account(customer.id());
-    } */
 }
 
-record Account(Integer id) {}
 record Customer(Integer id, String name) {}
